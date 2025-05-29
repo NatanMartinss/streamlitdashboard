@@ -12,8 +12,10 @@ def seletor_de_datas(chave_pagina: str = ""):
         date_option = st.selectbox(
             "Intervalo de datas",
             ["Escolher Data", "Ontem", "Últimos 7 dias", "Último mês", "Últimos 2 meses", "Último trimestre", "Último semestre"],
+            index=1,  # 👈 0 = "Escolher Data", 1 = "Ontem"
             key=f"selectbox_{chave_pagina}"
         )
+
 
         if date_option == "Escolher Data":
             start_date = st.date_input("Data inicial", datetime.today().date(), key=f"start_{chave_pagina}")

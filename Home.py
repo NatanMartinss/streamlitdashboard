@@ -27,8 +27,8 @@ engine = create_engine(f"mysql+pymysql://{secrets.user}:{secrets.password}@{secr
 # ✅ Query usando parâmetros nomeados (evita injeção de SQL)
 kpi_query = """
     SELECT
-    (SELECT COUNT(*) FROM appointments WHERE appointment_specialty = 'Confirmação de Dados' AND DATE(schedule_date_time) BETWEEN %s AND %s) AS confirmacoes,
-    (SELECT COUNT(*) FROM appointments WHERE appointment_specialty != 'Confirmação de Dados' AND DATE(schedule_date_time) BETWEEN %s AND %s) AS medicos,
+    (SELECT COUNT(*) FROM appointments WHERE appointment_specialty = 'Confirmação de Dados' AND DATE(CONVERT_TZ(schedule_date_time, '+00:00', '-03:00')) BETWEEN %s AND %s) AS confirmacoes,
+    (SELECT COUNT(*) FROM appointments WHERE appointment_specialty != 'Confirmação de Dados' AND DATE(CONVERT_TZ(schedule_date_time, '+00:00', '-03:00')) BETWEEN %s AND %s) AS medicos,
     (SELECT COUNT(*) 
      FROM files f
      JOIN appointments a ON f.appointment_id = a.id
@@ -39,8 +39,8 @@ kpi_query = """
      JOIN appointments a ON f.appointment_id = a.id
      WHERE LOWER(f.name_original) LIKE '%%receita%%'
        AND DATE(a.schedule_date_time) BETWEEN %s AND %s) AS receitas,
-    (SELECT ROUND(AVG(total_appointment_time)) FROM appointments WHERE appointment_specialty = 'Confirmação de Dados' AND DATE(schedule_date_time) BETWEEN %s AND %s) AS tempo_medio_helpdesk,
-    (SELECT ROUND(AVG(total_appointment_time)) FROM appointments WHERE appointment_specialty != 'Confirmação de Dados' AND DATE(schedule_date_time) BETWEEN %s AND %s) AS tempo_medio_medico
+    (SELECT ROUND(AVG(total_appointment_time)) FROM appointments WHERE appointment_specialty = 'Confirmação de Dados' AND DATE(CONVERT_TZ(schedule_date_time, '+00:00', '-03:00')) BETWEEN %s AND %s) AS tempo_medio_helpdesk,
+    (SELECT ROUND(AVG(total_appointment_time)) FROM appointments WHERE appointment_specialty != 'Confirmação de Dados' AND DATE(CONVERT_TZ(schedule_date_time, '+00:00', '-03:00')) BETWEEN %s AND %s) AS tempo_medio_medico
 
 """
 
@@ -95,19 +95,21 @@ df['name'] = df['name'].apply(lambda x: x.strip().split()[0].capitalize())
 if df.empty:
     st.warning("Nenhum dado encontrado para esse intervalo.")
 else:
-
     df_grouped = df.groupby('name').size().reset_index(name='quantidade')
     df_grouped = df_grouped.sort_values(by='quantidade', ascending=False)
     df_top = df_grouped.head(10)
 
     fig = px.bar(
         df_top,
-        x='name', y='quantidade',
+        x='name',
+        y='quantidade',
+        text_auto=True,
         labels={'name': 'Participante', 'quantidade': 'Atendimentos'},
         title="Atendimentos por médico"
     )
 
     st.plotly_chart(fig)
+
 
 
 query2 = f"""
@@ -123,48 +125,59 @@ ORDER BY quantidade DESC
 """
 
 df = pd.read_sql(query2, engine)
-# Agrupa por CID10 e conta quantos atendimentos cada um teve
+
 if df.empty:
     st.warning("Nenhum dado encontrado para esse intervalo.")
 else:
-# Ordena e pega os 10 mais frequentes
     df_top = df.head(10)
 
-    # Cria o gráfico de barras horizontais
     fig = px.bar(
         df_top,
         x='quantidade',
         y='cid10_value',
         orientation='h',
+        text_auto=True,
         labels={'cid10_value': 'CID10', 'quantidade': 'Quantidade'},
         title="Top 10 CID10 por número de atendimentos"
     )
 
-    # Layout com altura fixa
     fig.update_layout(
         yaxis=dict(categoryorder='total ascending'),
         height=500,
         margin=dict(l=100, r=20, t=50, b=20)
     )
 
-    # Exibe no Streamlit
     st.plotly_chart(fig, use_container_width=True)
+
 
 query3 = f"""
 SELECT appointment_specialty, COUNT(*) as quantidade
 FROM appointments
 WHERE appointment_specialty != 'Confirmação de Dados'
-  AND DATE(schedule_date_time) BETWEEN '{start_date}' AND '{end_date}'
+  AND DATE(CONVERT_TZ(schedule_date_time, '+00:00', '-03:00')) BETWEEN '{start_date}' AND '{end_date}'
 GROUP BY appointment_specialty
 ORDER BY quantidade DESC
 LIMIT 10
 """
 df3 = pd.read_sql(query3, engine)
 
-if (df3.empty):
+if df3.empty:
     st.warning("Nenhum dado encontrado para esse intervalo.")
 else:
-    fig3 = px.bar(df3, x='quantidade', y='appointment_specialty', orientation='h', labels={'appointment_specialty':'Especialidade','quantidade':'Quantidade'}, title="Top 10 Especialidades")
-    fig3.update_layout(yaxis={'categoryorder':'total ascending'}, height=400, margin=dict(l=100,r=20,t=50,b=20))
+    fig3 = px.bar(
+        df3,
+        x='quantidade',
+        y='appointment_specialty',
+        orientation='h',
+        text_auto=True,
+        labels={'appointment_specialty': 'Especialidade', 'quantidade': 'Quantidade'},
+        title="Top 10 Especialidades"
+    )
+
+    fig3.update_layout(
+        yaxis={'categoryorder': 'total ascending'},
+        height=400,
+        margin=dict(l=100, r=20, t=50, b=20)
+    )
 
     st.plotly_chart(fig3, use_container_width=True)
