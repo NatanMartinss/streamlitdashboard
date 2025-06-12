@@ -74,41 +74,41 @@ col4.metric("Receitas Emitidas", int(kpis['receitas'][0]))
 col5.metric("Tempo Médio de Atendimento HelpDesk", help_fmt)
 col6.metric("Tempo Médio Atendimento Médico", med_fmt)
 
-query = f"""
-SELECT ap.id as appointment_id, ap.appointment_specialty, ap.schedule_date_time,
-       pa.name, pa.role
+query = """
+SELECT pa.name,
+       COUNT(DISTINCT ap.id) AS quantidade
 FROM appointments ap
 JOIN appointment_participants pa ON ap.id = pa.appointment_id
 WHERE pa.role = 'mmd'
-  AND pa.name NOT LIKE '%%Elisia%%'
-  AND ap.appointment_specialty != 'confirmação de dados'
-  AND DATE(ap.schedule_date_time) BETWEEN '{start_date}' AND '{end_date}'
+  AND pa.name NOT LIKE %s
+  AND LOWER(ap.appointment_specialty) != %s
+  AND DATE(CONVERT_TZ(ap.schedule_date_time, '+00:00', '-03:00')) BETWEEN %s AND %s
+GROUP BY pa.name
+ORDER BY quantidade DESC
+LIMIT 10
+
 """
 
+params = ('%Elisia%', 'confirmação de dados', start_date, end_date)
 
-# 📊 Gráfico de barras
+df = pd.read_sql(query, engine, params=params)
 
 
-df = pd.read_sql(query, engine)
-df['name'] = df['name'].apply(lambda x: x.strip().split()[0].capitalize())
-
-if df.empty:
-    st.warning("Nenhum dado encontrado para esse intervalo.")
-else:
-    df_grouped = df.groupby('name').size().reset_index(name='quantidade')
-    df_grouped = df_grouped.sort_values(by='quantidade', ascending=False)
-    df_top = df_grouped.head(10)
+if not df.empty:
+    df['name'] = df['name'].apply(lambda x: x.strip().split()[0].capitalize())
 
     fig = px.bar(
-        df_top,
+        df,
         x='name',
         y='quantidade',
         text_auto=True,
-        labels={'name': 'Participante', 'quantidade': 'Atendimentos'},
-        title="Atendimentos por médico"
+        labels={'name': 'Médico', 'quantidade': 'Atendimentos'},
+        title="Atendimentos por Médico"
     )
-
     st.plotly_chart(fig)
+else:
+    st.warning("Nenhum dado encontrado para esse intervalo.")
+
 
 
 
