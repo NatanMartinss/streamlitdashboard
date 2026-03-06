@@ -1,0 +1,24 @@
+{
+  "name": "pythonstreamlitdashboard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "horaconsulta.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NatanMartinss/streamlitdashboard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/NatanMartinss/streamlitdashboard/issues"
+  },
+  "homepage": "https://github.com/NatanMartinss/streamlitdashboard#readme",
+  "dependencies": {
+    "mysql2": "^3.15.3"
+  }
+}

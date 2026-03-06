@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-changeit}
+      MYSQL_DATABASE: ${DB_NAME:-appdb}
+      MYSQL_USER: ${DB_USER:-app}
+      MYSQL_PASSWORD: ${DB_PASS:-changeit}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    command: ["--default-authentication-plugin=mysql_native_password"]
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./medical-dashboard-backend
+      dockerfile: Dockerfile
+    environment:
+      - PORT=8000
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=${DB_USER:-app}
+      - DB_PASS=${DB_PASS:-changeit}
+      - DB_NAME=${DB_NAME:-appdb}
+      - TZ=UTC
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./medical-dashboard-frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://backend:8000
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+      - TZ=UTC
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  db_data:

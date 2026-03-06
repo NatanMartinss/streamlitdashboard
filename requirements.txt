@@ -3,3 +3,9 @@ pandas
 plotly
 sqlalchemy
 pymysql
+bcrypt
+streamlit-authenticator
+reportlab
+matplotlib
+seaborn
+python-dotenv

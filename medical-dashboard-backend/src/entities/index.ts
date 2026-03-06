@@ -1,0 +1,11 @@
+export { Company } from './company.entity';
+export { Appointment } from './appointment.entity';
+export { User } from './user.entity';
+export { File } from './file.entity';
+export { AppointmentDetail } from './appointment-detail.entity';
+export { AppointmentParticipant } from './appointment-participant.entity';
+export { Protocol } from './protocol.entity';
+export { ProtocolHistory } from './protocol-history.entity';
+export { UserSession } from './user-session.entity';
+export { ProtocolEvent } from './protocol-event.entity';
+export { DashboardData } from './dashboard-data.entity';

@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  /* Bitcare brand tokens (ajustáveis) */
+  --brand-primary: #1463FF;
+  --brand-secondary: #00B9FF;
+  --brand-accent: #10B981;
+  --brand-dark: #0B1220;
+  --brand-bg: #F7FAFC;
+  --brand-text: #0F172A;
+  --brand-muted: #64748B;
+  --brand-border: #E5E7EB;
+  /* Cards e layout */
+  --card-bg: #ffffff;
+  --card-border: #E5E7EB;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  --grid-gap: 1rem; /* layout compacto */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  /* Tailwind v4 tokens para cores Bitcare */
+  --color-bitcare-primary: #007BFF;
+  --color-bitcare-dark: #002B5C;
+  --color-bitcare-success: #00B894;
+  --color-bitcare-danger: #E74C3C;
+  --color-bitcare-bg: #F5F6FA;
+  --color-bitcare-text: #2D3436;
+  --color-bitcare-highlight: rgba(0,123,255,0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+/* Tema escuro manual via data-theme */
+[data-theme="dark"] {
+  --background: #0B1220;
+  --foreground: #E6EDF7;
+  --brand-bg: #0B1220;
+  --brand-text: #E6EDF7;
+  --brand-border: #1F2937;
+  --color-bitcare-bg: #0F172A;
+  --color-bitcare-text: #CBD5E1;
+  --card-bg: #0F172A; /* cinza-900 aproximado */
+  --card-border: #1F2937; /* cinza-800 */
+}
+
+body {
+  background: var(--brand-bg);
+  color: var(--brand-text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Utilitários de marca */
+.bg-brand { background-color: var(--brand-primary); }
+.text-brand { color: var(--brand-primary); }
+.border-brand { border-color: var(--brand-border); }
+.bg-brand-gradient { background-image: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); }
+.btn-brand {
+  background-color: var(--brand-primary);
+  color: #fff;
+}
+.btn-brand:hover { background-color: color-mix(in oklab, var(--brand-primary) 85%, black 15%); }
+.header-brand {
+  background-image: linear-gradient(180deg, #002B5C 0%, #003C7A 100%);
+  color: #fff;
+}
+
+/* Util classes baseadas em tokens Tailwind v4 */
+.bg-bitcare-dark { background-color: var(--color-bitcare-dark); }
+.bg-bitcare-primary { background-color: var(--color-bitcare-primary); }
+.text-bitcare-success { color: var(--color-bitcare-success); }
+.text-bitcare-danger { color: var(--color-bitcare-danger); }
+.text-bitcare-muted { color: var(--color-bitcare-text); opacity: 0.85; }
+.ring-bitcare-highlight { --tw-ring-color: var(--color-bitcare-highlight); }
+
+/* Aura superior discreta (Bitcare) */
+.aura-top {
+  background-image: linear-gradient(180deg, color-mix(in oklab, var(--brand-primary) 30%, transparent), transparent);
+}
+
+/* Recharts ajustes sutis para reduzir agressividade visual */
+.recharts-cartesian-grid line { stroke: var(--brand-border); opacity: 0.6; }
+.recharts-tooltip-wrapper { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.12)); }
+.recharts-default-tooltip { background: var(--card-bg) !important; border: 1px solid var(--card-border) !important; }
+.recharts-legend-wrapper { opacity: 0.85; }

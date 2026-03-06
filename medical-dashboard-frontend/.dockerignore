@@ -1,0 +1,13 @@
+# Arquivos e pastas que não devem ir para o contexto do Docker
+.git
+.gitignore
+.vscode
+node_modules
+.next/cache
+.next/standalone
+.next/static
+coverage
+dist
+npm-debug.log
+yarn-error.log
+.env*
